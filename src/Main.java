@@ -30,6 +30,8 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	static ArrayList<String> fileIndex = new ArrayList<>();
 	static ArrayList<CopyThread> threads=new ArrayList<>();
 	static int completed, total;
+	static long totalDownloadSize,completedDownload;
+	static double downloadPercent;
 	public static void main(String[] args) {
 		
 		Scanner fileReader;
@@ -40,7 +42,6 @@ public class Main implements ActionListener, WindowListener, Runnable {
 			gameLocation=fileReader.nextLine();
 			fileReader.close();
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			return;
 		}
