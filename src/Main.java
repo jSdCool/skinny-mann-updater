@@ -148,24 +148,36 @@ public class Main implements ActionListener, WindowListener, Runnable {
 
 	private static void downloadAndInstallUpdate() {
 		System.out.println("attempting to download");
-		//*
+		//*download the new release
 		try {
 			DownloadFile.download(downloadLink, "temp.zip");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			generalStatus.setText("something went wrong, please try again");
 			panel.repaint();
 			e.printStackTrace();
 			everyThingOk=false;
+			return;
 		}//*/
+		downloadProgreeBar.setVisible(false);
+		try {
+		//extract the files from the downloaded zip
 		generalStatus.setText("status: extracting files");
 		currentTask.setVisible(true);
 		panel.repaint();
 		System.out.println("done downloading\nstarting extraction");
 		extractZip();
+		//find the location in the extracted files of the platform specific execuable file. the directory this file is in is what needs to be copyed
 		System.out.println("extraction finished");
 		String tempPath=findExe("temp","");
 		System.out.println(tempPath);
+		
+		if(cleanInstall) {
+			//delete the old install files for a clean install
+			generalStatus.setText("status: Deleting old game files");
+			deleteRecursive(gameLocation);
+			new File(gameLocation).mkdirs();//re create the folder 
+		}
+		//copy the files to the install folder
 		currentTask.setVisible(false);
 		CThread[0].setVisible(true);
 		CThread[1].setVisible(true);
@@ -179,9 +191,20 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		CThread[1].setVisible(false);
 		CThread[2].setVisible(false);
 		CThread[3].setVisible(false);
+		generalStatus.setText("status: Cleaning up");
+		//delete the downloaded file
+		new File("temp.zip").delete();
+		//delete the extracted files
+		deleteRecursive(source);
 		generalStatus.setText("status: Done. Update complete you can now launch the game");
 		panel.repaint();
-		
+		}catch(Exception e) {
+			generalStatus.setText("something went wrong, please try again");
+			panel.repaint();
+			e.printStackTrace();
+			everyThingOk=false;
+			return;
+		}
 	}
 
 	private static void extractZip() {
@@ -307,6 +330,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	static String yesPoint=null;
 	
 	static void copyFiles() {
+		fileIndex = new ArrayList<>();
 		threads=new ArrayList<>();
 		
 		int numOfThreads=4;
@@ -395,37 +419,37 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	
 	@Override
 	public void windowOpened(WindowEvent e) {
-		// TODO Auto-generated method stub
+
 		
 	}
 	@Override
 	public void windowClosing(WindowEvent e) {
-		// TODO Auto-generated method stub
+
 		System.exit(0);
 	}
 	@Override
 	public void windowClosed(WindowEvent e) {
-		// TODO Auto-generated method stub
+
 		System.exit(0);
 	}
 	@Override
 	public void windowIconified(WindowEvent e) {
-		// TODO Auto-generated method stub
+
 		
 	}
 	@Override
 	public void windowDeiconified(WindowEvent e) {
-		// TODO Auto-generated method stub
+
 		
 	}
 	@Override
 	public void windowActivated(WindowEvent e) {
-		// TODO Auto-generated method stub
+
 		
 	}
 	@Override
 	public void windowDeactivated(WindowEvent e) {
-		// TODO Auto-generated method stub
+
 		
 	}
 	
@@ -498,5 +522,19 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		}
 		return "AN ERROR OCCORED WHILE ATTEMPTING TO GET DOWNLOAD LINK";
 	}
+	
+	static boolean deleteRecursive(String path){
+        File f = new File(path);
+        if(f.isDirectory()){
+            String[] files = f.list();
+            if(files == null)
+                return false;
+            for (String file: files){
+                deleteRecursive(path+File.separator+file);
+            }
+        }
+        return f.delete();
+
+    }
 
 }
