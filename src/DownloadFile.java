@@ -23,7 +23,9 @@ public class DownloadFile {
 		    if (n > 0) {
 		        output.write(buffer, 0, n);
 		        Main.completedDownload += buffer.length;
-		        Main.downloadPercent = Main.completedDownload / Main.totalDownloadSize;
+		        Main.downloadPercent = ((double)Main.completedDownload / Main.totalDownloadSize);
+		        Main.downloadProgreeBar.setValue((int)(Main.downloadPercent*100));
+		        //Main.downloadProgreeBar.repaint();
 		    }
 		}
 		output.close();

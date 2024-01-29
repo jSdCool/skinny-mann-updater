@@ -10,9 +10,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -25,6 +27,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	static JLabel title,generalStatus,currentTask;
 	static JLabel CThread[]=new JLabel[4];
 	static JButton updateButton;
+	static JComboBox<String> versions;
 	
 	static String downloadLink="",newGameVersion="",gameLocation="",source="temp";
 	static boolean everyThingOk=true;
@@ -35,6 +38,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	static double downloadPercent;
 	static HashMap<OS,String> exeFileNames = new HashMap<>();
 	static OS currentOS;
+	static JProgressBar downloadProgreeBar;
 	
 	static {
 		exeFileNames.put(OS.WINDOWS, "skiny_mann.exe");
@@ -54,8 +58,14 @@ public class Main implements ActionListener, WindowListener, Runnable {
 			fileReader.close();
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
-			return;
+			//return;
+			downloadLink="https://github.com/jSdCool/skinny-mann/releases/download/v0.7.0/skinny.mann.win64.zip";
+			newGameVersion="tmp";
+			gameLocation="tmp";
 		}
+		
+		
+		
 		new Main();
 
 		//downloadAndInstallUpdate();
@@ -72,7 +82,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		frame.setTitle("Skinny Mann updater");
 		title=new JLabel("update skinny mann to version "+newGameVersion);
 		title.setBounds(10, 20, 300, 25);
-		panel.add(title);
+		panel.add(title);		
 		updateButton=new JButton("Update");
 		updateButton.setBounds(10,40,200,25);
 		updateButton.addActionListener(this);
@@ -101,7 +111,18 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		CThread[3].setVisible(false);
 		panel.add(CThread[3]);
 		
+		versions = new JComboBox<String>(getVersions());
 		
+		versions.setBounds(10,70,200,25);
+		panel.add(versions);
+		
+		downloadProgreeBar = new JProgressBar();
+		downloadProgreeBar.setBounds(10, 80, 400, 25);
+		downloadProgreeBar.setValue(0);
+		downloadProgreeBar.setVisible(false);
+		panel.add(downloadProgreeBar);
+		
+		panel.repaint();
 	}
 
 	private static void downloadAndInstallUpdate() {
@@ -215,6 +236,8 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		if(e.getSource().equals(updateButton)) {
 			updateButton.setVisible(false);
 			generalStatus.setVisible(true);
+			versions.setVisible(false);
+			downloadProgreeBar.setVisible(true);
 			generalStatus.setText("status: downloading update. this may take a while");
 			panel.repaint();
 			everyThingOk=true;
@@ -392,6 +415,10 @@ public class Main implements ActionListener, WindowListener, Runnable {
 			currentOS=OS.MACOS;
 			return;
 		}
+	}
+	
+	public String[] getVersions() {
+		return new String[] {"1.0.0","1.1.1","0.0.0"};
 	}
 
 }
