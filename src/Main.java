@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,7 +33,17 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	static int completed, total;
 	static long totalDownloadSize,completedDownload;
 	static double downloadPercent;
+	static HashMap<OS,String> exeFileNames = new HashMap<>();
+	static OS currentOS;
+	
+	static {
+		exeFileNames.put(OS.WINDOWS, "skiny_mann.exe");
+		exeFileNames.put(OS.LINUX, "skiny_mann");
+		exeFileNames.put(OS.MACOS, "skiny_mann.app");
+	}
+	
 	public static void main(String[] args) {
+		detectOS();
 		
 		Scanner fileReader;
 		try {
@@ -229,9 +240,10 @@ public class Main implements ActionListener, WindowListener, Runnable {
 				findExe(parentPath,subPath+"/"+files[i]);//if it is a folder then scan through that folder for more files
 
 			}else {//if it is a file
-				if(files[i].equals("skiny_mann.exe")) {
-					yesPoint= parentPath+subPath;
-				}
+				if(currentOS != OS.LINUX || new File(files[i]).isFile())//if on linux make sure it is in fact a file since there is no extention
+					if(files[i].equals(exeFileNames.get(currentOS))) {
+						yesPoint= parentPath+subPath;
+					}
 			}
 		}
 		return yesPoint;
@@ -359,6 +371,27 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	public void windowDeactivated(WindowEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public enum OS{
+		WINDOWS,LINUX,MACOS;
+	}
+	
+	static void detectOS() {
+		String name = System.getProperty("os.name");
+		name=name.toLowerCase();
+		if(name.contains("windows")) {
+			currentOS = OS.WINDOWS;
+			return;
+		}
+		if(name.contains("linux")) {
+			currentOS=OS.LINUX;
+			return;
+		}
+		if(name.contains("macos")) {
+			currentOS=OS.MACOS;
+			return;
+		}
 	}
 
 }
