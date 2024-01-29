@@ -30,7 +30,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	static JComboBox<String> versions;
 	
 	static String downloadLink="",newGameVersion="",gameLocation="",source="temp";
-	static boolean everyThingOk=true;
+	static boolean everyThingOk=true,includeJAVA=false;
 	static ArrayList<String> fileIndex = new ArrayList<>();
 	static ArrayList<CopyThread> threads=new ArrayList<>();
 	static int completed, total;
@@ -52,16 +52,14 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		Scanner fileReader;
 		try {
 			fileReader = new Scanner(new File("downloadInfo.txt"));
-			downloadLink=fileReader.nextLine();
-			newGameVersion=fileReader.nextLine();
-			gameLocation=fileReader.nextLine();
+			/*downloadLink=*/fileReader.nextLine();
+			/*newGameVersion=*/fileReader.nextLine();
+			gameLocation=fileReader.nextLine();//game location is on the 3rd line for backwards compability reasons
 			fileReader.close();
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 			//return;
-			downloadLink="https://github.com/jSdCool/skinny-mann/releases/download/v0.7.0/skinny.mann.win64.zip";
-			newGameVersion="tmp";
-			gameLocation="tmp";
+			
 		}
 		
 		
@@ -80,11 +78,14 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		frame.addWindowListener(this);
 		panel.setLayout(null);
 		frame.setTitle("Skinny Mann updater");
-		title=new JLabel("update skinny mann to version "+newGameVersion);
+		title=new JLabel("update skinny mann to version ");
 		title.setBounds(10, 20, 300, 25);
 		panel.add(title);		
+		versions = new JComboBox<String>(getVersions());
+		versions.setBounds(10,40,200,25);
+		panel.add(versions);
 		updateButton=new JButton("Update");
-		updateButton.setBounds(10,40,200,25);
+		updateButton.setBounds(10,70,200,25);
 		updateButton.addActionListener(this);
 		panel.add(updateButton);
 		generalStatus=new JLabel("status: ");
@@ -111,10 +112,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		CThread[3].setVisible(false);
 		panel.add(CThread[3]);
 		
-		versions = new JComboBox<String>(getVersions());
 		
-		versions.setBounds(10,70,200,25);
-		panel.add(versions);
 		
 		downloadProgreeBar = new JProgressBar();
 		downloadProgreeBar.setBounds(10, 80, 400, 25);
@@ -232,13 +230,16 @@ public class Main implements ActionListener, WindowListener, Runnable {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		if(e.getSource().equals(updateButton)) {
 			updateButton.setVisible(false);
 			generalStatus.setVisible(true);
 			versions.setVisible(false);
 			downloadProgreeBar.setVisible(true);
+			newGameVersion = (String)versions.getSelectedItem();
+			title.setText("update skinny mann to version "+newGameVersion);
 			generalStatus.setText("status: downloading update. this may take a while");
+			downloadLink = getDownloadLink(newGameVersion);
+			System.out.println(downloadLink);
 			panel.repaint();
 			everyThingOk=true;
 			Thread doUpdate=new Thread(this);
@@ -418,7 +419,52 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	}
 	
 	public String[] getVersions() {
-		return new String[] {"1.0.0","1.1.1","0.0.0"};
+		try {
+			String veriosnFile = DownloadFile.readFileFromGithub("https://raw.githubusercontent.com/jSdCool/CBI-games-version-checker/master/skinny_mann_versions.txt");
+			return veriosnFile.split("\n");
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return new String[] {"ERROR READING VERSIONS"};
+	}
+	
+	static String getDownloadLink(String version) {
+		try {
+			String rawFile = DownloadFile.readFileFromGithub("https://raw.githubusercontent.com/jSdCool/CBI-games-version-checker/master/skinny_mann_versions_links.txt");
+			String[] lines = rawFile.split("\n");
+			for(int i=0;i<lines.length;i++) {
+				if(lines[i].startsWith("ver_"+version)) {
+					String searchString;
+					//get the platform specific version to download
+					switch(currentOS) {
+						case WINDOWS:
+							if(includeJAVA)
+								searchString = "winje";
+							else
+								searchString = "win";
+							break;
+						case LINUX:
+							searchString = "lin";
+							break;
+						case MACOS:
+							searchString = "mac";
+							break;
+						default:
+							searchString = "ERROR";
+					}
+					//use the search string to find the correct line with the version download link on it
+					for(int j=1;j<5;j++) {
+						if(lines[i+j].startsWith(searchString)) {
+							return lines[i+j].split(" ")[1];
+						}
+					}
+					return "UNABLE TO FIND DOWNLOAD LINK";
+				}
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return "AN ERROR OCCORED WHILE ATTEMPTING TO GET DOWNLOAD LINK";
 	}
 
 }
