@@ -10,6 +10,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,13 +25,13 @@ import java.awt.event.ActionListener;
 public class Main implements ActionListener, WindowListener, Runnable {
 	static JFrame frame;
 	static JPanel panel;
-	static JLabel title,generalStatus,currentTask;
+	static JLabel title,generalStatus,currentTask,cleanInstallLabel,includeJavaLabel;
 	static JLabel CThread[]=new JLabel[4];
 	static JButton updateButton;
 	static JComboBox<String> versions;
 	
-	static String downloadLink="",newGameVersion="",gameLocation="",source="temp";
-	static boolean everyThingOk=true,includeJAVA=false;
+	static String downloadLink="",newGameVersion="",gameLocation="",source="temp" , versionList[] = getVersions();
+	static boolean everyThingOk=true,includeJAVA=false,cleanInstall;
 	static ArrayList<String> fileIndex = new ArrayList<>();
 	static ArrayList<CopyThread> threads=new ArrayList<>();
 	static int completed, total;
@@ -39,6 +40,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	static HashMap<OS,String> exeFileNames = new HashMap<>();
 	static OS currentOS;
 	static JProgressBar downloadProgreeBar;
+	static JCheckBox cleanInstallCheckBox,includeJavaCheckBox;
 	
 	static {
 		exeFileNames.put(OS.WINDOWS, "skiny_mann.exe");
@@ -81,7 +83,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		title=new JLabel("update skinny mann to version ");
 		title.setBounds(10, 20, 300, 25);
 		panel.add(title);		
-		versions = new JComboBox<String>(getVersions());
+		versions = new JComboBox<String>(versionList);
 		versions.setBounds(10,40,200,25);
 		panel.add(versions);
 		updateButton=new JButton("Update");
@@ -120,6 +122,27 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		downloadProgreeBar.setVisible(false);
 		panel.add(downloadProgreeBar);
 		
+		cleanInstallCheckBox = new JCheckBox();
+		cleanInstallCheckBox.setBounds(10, 100, 25, 25);
+		
+		panel.add(cleanInstallCheckBox);
+		
+		includeJavaCheckBox = new JCheckBox();
+		includeJavaCheckBox.setBounds(10, 130, 25, 25);
+		includeJavaCheckBox.setSelected(true);
+		panel.add(includeJavaCheckBox);
+		
+		cleanInstallLabel = new JLabel("Clean Install");
+		cleanInstallLabel.setBounds(40,100,100,25);
+		panel.add(cleanInstallLabel);
+		includeJavaLabel = new JLabel("Include JRE");
+		includeJavaLabel.setBounds(40, 130, 100, 25);
+		panel.add(includeJavaLabel);
+		
+		if(currentOS != OS.WINDOWS) {
+			includeJavaCheckBox.setVisible(false);
+			includeJavaLabel.setVisible(false);
+		}
 		panel.repaint();
 	}
 
@@ -235,6 +258,12 @@ public class Main implements ActionListener, WindowListener, Runnable {
 			generalStatus.setVisible(true);
 			versions.setVisible(false);
 			downloadProgreeBar.setVisible(true);
+			cleanInstallCheckBox.setVisible(false);
+			cleanInstallLabel.setVisible(false);
+			includeJavaCheckBox.setVisible(false);
+			includeJavaLabel.setVisible(false);
+			includeJAVA = includeJavaCheckBox.isSelected();
+			cleanInstall = cleanInstallCheckBox.isSelected();
 			newGameVersion = (String)versions.getSelectedItem();
 			title.setText("update skinny mann to version "+newGameVersion);
 			generalStatus.setText("status: downloading update. this may take a while");
@@ -261,6 +290,9 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		for(int i=0;i<files.length;i++) {//loop through all the things in the current folder
 
 			if(new File(parentPath+"/"+subPath+"/"+files[i]).list()!=null) {//check weather the current thing is a folder or a file 
+				if(currentOS == OS.MACOS && files[i].equals(exeFileNames.get(currentOS))) {
+					yesPoint= parentPath+subPath;
+				}
 				findExe(parentPath,subPath+"/"+files[i]);//if it is a folder then scan through that folder for more files
 
 			}else {//if it is a file
@@ -418,7 +450,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		}
 	}
 	
-	public String[] getVersions() {
+	public static String[] getVersions() {
 		try {
 			String veriosnFile = DownloadFile.readFileFromGithub("https://raw.githubusercontent.com/jSdCool/CBI-games-version-checker/master/skinny_mann_versions.txt");
 			return veriosnFile.split("\n");
