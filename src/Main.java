@@ -267,6 +267,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	public void run() {
 		downloadAndInstallUpdate();
 		if(!everyThingOk) {
+			updateButton.setBounds(300,70,200,25);
 			updateButton.setVisible(true);
 			panel.repaint();
 			return;
@@ -319,10 +320,12 @@ public class Main implements ActionListener, WindowListener, Runnable {
 				findExe(parentPath,subPath+"/"+files[i]);//if it is a folder then scan through that folder for more files
 
 			}else {//if it is a file
-				if(currentOS != OS.LINUX || new File(files[i]).isFile())//if on linux make sure it is in fact a file since there is no extention
-					if(files[i].equals(exeFileNames.get(currentOS))) {
+				//System.out.println(new File(parentPath+subPath+"/"+files[i]).getAbsolutePath()+" | "+ (currentOS != OS.LINUX)+" | "+new File(parentPath+subPath+"/"+files[i]).isFile());
+				if(currentOS != OS.LINUX || new File(parentPath+subPath+"/"+files[i]).isFile())//if on linux make sure it is in fact a file since there is no extention
+					if(files[i].equals(exeFileNames.get(currentOS)) || (currentOS == OS.LINUX && files[i].equals("skinny-mann"))/*version 0.8.0 was named incorrectly for the linux version*/) {
 						yesPoint= parentPath+subPath;
 					}
+				
 			}
 		}
 		return yesPoint;
@@ -468,7 +471,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 			currentOS=OS.LINUX;
 			return;
 		}
-		if(name.contains("macos")) {
+		if(name.contains("mac")) {
 			currentOS=OS.MACOS;
 			return;
 		}
