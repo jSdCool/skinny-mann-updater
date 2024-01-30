@@ -28,7 +28,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 	static JPanel panel;
 	static JLabel title,generalStatus,currentTask,cleanInstallLabel,includeJavaLabel;
 	static JLabel CThread[]=new JLabel[4];
-	static JButton updateButton;
+	static JButton updateButton,launchGameButton;
 	static JComboBox<String> versions;
 	
 	static String downloadLink="",newGameVersion="",gameLocation="",source="temp" , versionList[] = getVersions();
@@ -146,6 +146,13 @@ public class Main implements ActionListener, WindowListener, Runnable {
 			includeJavaCheckBox.setVisible(false);
 			includeJavaLabel.setVisible(false);
 		}
+		
+		launchGameButton = new JButton("Launch Game");
+		launchGameButton.setBounds(10,90,200,25);
+		launchGameButton.setVisible(false);
+		launchGameButton.addActionListener(this);
+		panel.add(launchGameButton);
+		
 		panel.repaint();
 	}
 
@@ -200,7 +207,9 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		//delete the extracted files
 		deleteRecursive(source);
 		generalStatus.setText("status: Done. Update complete you can now launch the game");
+		launchGameButton.setVisible(true);
 		panel.repaint();
+		
 		}catch(Exception e) {
 			generalStatus.setText("something went wrong, please try again");
 			panel.repaint();
@@ -301,6 +310,32 @@ public class Main implements ActionListener, WindowListener, Runnable {
 			Thread doUpdate=new Thread(this);
 			doUpdate.start();
 
+		}
+		if(e.getSource().equals(launchGameButton)) {
+			String exeName = exeFileNames.get(currentOS);
+			if(currentOS == OS.LINUX) {//set file permissions on linux
+				ProcessBuilder permissionSet = new ProcessBuilder("chmod", "-R", "755" ,gameLocation);
+		        permissionSet.directory(new File(gameLocation));
+		        try {
+					permissionSet.start();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			    if(!new File(gameLocation+"/"+exeName).exists()) {
+			    	exeName = "skinny-mann";//version 0.8.0 fix
+			    }
+			}
+			
+			
+			ProcessBuilder pb = new ProcessBuilder(gameLocation+"/"+exeName);
+		    pb.directory(new File(gameLocation));
+		    try {
+				pb.start();
+				System.exit(0);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		    
 		}
 				
 	
