@@ -14,6 +14,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
@@ -61,7 +62,8 @@ public class Main implements ActionListener, WindowListener, Runnable {
 			fileReader.close();
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
-			//return;
+			JOptionPane.showMessageDialog(null,"file that contains the game location was not found","FILE NOT FOUND",JOptionPane.ERROR_MESSAGE);
+			return;
 			
 		}
 		
