@@ -55,7 +55,8 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		try {
 			fileReader = new Scanner(new File("downloadInfo.txt"));
 			/*downloadLink=*/fileReader.nextLine();
-			/*newGameVersion=*/fileReader.nextLine();
+			/*newGameVersion=*/String line2 = fileReader.nextLine();
+			includeJAVA = !line2.equals("NJE");
 			gameLocation=fileReader.nextLine();//game location is on the 3rd line for backwards compability reasons
 			fileReader.close();
 		} catch (FileNotFoundException e1) {
@@ -129,7 +130,7 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		
 		includeJavaCheckBox = new JCheckBox();
 		includeJavaCheckBox.setBounds(10, 130, 25, 25);
-		includeJavaCheckBox.setSelected(true);
+		includeJavaCheckBox.setSelected(includeJAVA);
 		panel.add(includeJavaCheckBox);
 		
 		cleanInstallLabel = new JLabel("Clean Install");
