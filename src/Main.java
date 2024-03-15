@@ -313,27 +313,51 @@ public class Main implements ActionListener, WindowListener, Runnable {
 		}
 		if(e.getSource().equals(launchGameButton)) {
 			String exeName = exeFileNames.get(currentOS);
-			if(currentOS == OS.LINUX) {//set file permissions on linux
-				ProcessBuilder permissionSet = new ProcessBuilder("chmod", "-R", "755" ,gameLocation);
-		        permissionSet.directory(new File(gameLocation));
+			
+			if(currentOS == OS.MACOS) {
+				//permission set
+				System.out.println("Setting Executable Permission");
+				ProcessBuilder permissionSet = new ProcessBuilder("chmod", "+x" ,gameLocation+"/"+exeName+"/Contents/MacOS/skiny_mann");
+		        permissionSet.directory(new File(gameLocation+"/"+exeName+"/Contents/MacOS"));
 		        try {
 					permissionSet.start();
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-			    if(!new File(gameLocation+"/"+exeName).exists()) {
-			    	exeName = "skinny-mann";//version 0.8.0 fix
-			    }
-			}
+		        System.out.println("Starting Game: ");
+				//launch
+		        ProcessBuilder pb = new ProcessBuilder("open","-a",gameLocation+"/"+exeName);
+			    pb.directory(new File(gameLocation));
+			    try {
+					pb.start();
+					System.exit(0);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}else {
 			
-			
-			ProcessBuilder pb = new ProcessBuilder(gameLocation+"/"+exeName);
-		    pb.directory(new File(gameLocation));
-		    try {
-				pb.start();
-				System.exit(0);
-			} catch (IOException e1) {
-				e1.printStackTrace();
+				if(currentOS == OS.LINUX) {//set file permissions on linux
+					ProcessBuilder permissionSet = new ProcessBuilder("chmod", "-R", "755" ,gameLocation);
+			        permissionSet.directory(new File(gameLocation));
+			        try {
+						permissionSet.start();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				    if(!new File(gameLocation+"/"+exeName).exists()) {
+				    	exeName = "skinny-mann";//version 0.8.0 fix
+				    }
+				}
+				
+				
+				ProcessBuilder pb = new ProcessBuilder(gameLocation+"/"+exeName);
+			    pb.directory(new File(gameLocation));
+			    try {
+					pb.start();
+					System.exit(0);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		    
 		}
